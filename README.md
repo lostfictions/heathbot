@@ -2,6 +2,7 @@ a nice bot 4 u.
 
 dockerized. will tweet and toot extremely official heathcliff comics regularly.
 
+![it's heathcliff!](https://i.imgur.com/Sm4PpX6.png)
 
 - `MASTODON_TOKEN`: a Mastodon user API token
 - `MASTODON_SERVER`: the instance to which API calls should be made (usually
@@ -21,3 +22,5 @@ API tokens you put in there.)
 heathbot is written in typescript, and the dockerfile will compile to js as part
 of its setup. run `npm run watch:ts` if you're hacking on things and want to
 automatically recompile on changes.
+
+![another classic heathcliff.](https://i.imgur.com/J061W3c.png)
