@@ -24,3 +24,5 @@ of its setup. run `npm run watch:ts` if you're hacking on things and want to
 automatically recompile on changes.
 
 ![another classic heathcliff.](https://i.imgur.com/J061W3c.png)
+
+[more bots](https://github.com/lostfictions?tab=repositories&q=botally)
