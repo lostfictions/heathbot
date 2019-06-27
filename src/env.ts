@@ -24,7 +24,8 @@ export const {
   TWITTER_CONSUMER_SECRET,
   TWITTER_ACCESS_KEY,
   TWITTER_ACCESS_SECRET,
-  CRON_RULE
+  CRON_RULE,
+  isDev
 } = env;
 
 if (!fs.existsSync(DATA_DIR)) {
@@ -38,7 +39,7 @@ export const isValidTwitterConfiguration =
   TWITTER_ACCESS_KEY &&
   TWITTER_ACCESS_SECRET;
 
-if (!isValidMastodonConfiguration && !isValidTwitterConfiguration) {
+if (!isDev && !isValidMastodonConfiguration && !isValidTwitterConfiguration) {
   console.error(`Invalid environment config!`);
   console.error(
     `Bot will do nothing if no Mastodon API token (or Twitter API token set) is present.`
@@ -57,5 +58,6 @@ if (!isValidMastodonConfiguration && !isValidTwitterConfiguration) {
   const configInfo = varsToCheck
     .map(key => `${key}: ${env[key] ? "OK" : "NONE"}`)
     .join("\n");
+
   throw new Error(configInfo);
 }
