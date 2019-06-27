@@ -42,31 +42,45 @@ export async function makeHeathcliff(): Promise<string> {
   // always shrink the larger image rather than blow up the small one.
   const [small, big] = i.width < j.width ? [i, j] : [j, i];
 
-  const c = createCanvas(small.width, small.height);
-  const ctx = c.getContext("2d");
-  ctx.quality = "best";
+  const smallCanvas = createCanvas(small.width, small.height);
+  const smallCtx = smallCanvas.getContext("2d");
+  smallCtx.quality = "best";
+  smallCtx.drawImage(small, 0, 0);
+  const smallBottom =
+    detectBottom(smallCtx, smallCanvas.width, smallCanvas.height) + 5;
 
-  ctx.drawImage(small, 0, 0);
+  const bigCanvas = createCanvas(big.width, big.height);
+  const bigCtx = bigCanvas.getContext("2d");
+  bigCtx.quality = "best";
+  bigCtx.drawImage(big, 0, 0);
+  const bigBottom = detectBottom(bigCtx, bigCanvas.width, bigCanvas.height) + 5;
 
-  const destHeight = (small.width / big.width) * (big.height * 0.1);
+  const shrinkAmount = small.width / big.width;
+  const captionHeight = Math.floor(
+    (bigCanvas.height - bigBottom) * shrinkAmount
+  );
 
-  ctx.drawImage(
+  const destCanvas = createCanvas(small.width, smallBottom + captionHeight);
+  const destCtx = destCanvas.getContext("2d");
+  destCtx.quality = "best";
+  destCtx.drawImage(small, 0, 0);
+  destCtx.drawImage(
     big,
     0,
-    big.height * 0.9,
-    big.width,
-    big.height * 0.1,
+    bigBottom,
+    bigCanvas.width,
+    bigCanvas.height - bigBottom,
     0,
-    small.height - destHeight,
+    smallBottom,
     small.width,
-    destHeight
+    captionHeight
   );
 
   filenameIndex += 1;
   const filename = path.join(outDir, `heathcliff_${filenameIndex}.png`);
 
   const out = fs.createWriteStream(filename);
-  const stream = c.createPNGStream();
+  const stream = destCanvas.createPNGStream();
   stream.pipe(out);
 
   return new Promise<string>((res, rej) => {
@@ -80,7 +94,6 @@ function detectBottom(
   width: number,
   height: number
 ): number {
-  // TODO: 20% instead of 10
   const sliceHeight = Math.ceil(height * 0.15);
 
   const imageData = ctx.getImageData(
