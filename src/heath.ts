@@ -37,9 +37,9 @@ let filenameIndex = 0;
 
 export async function makeHeathcliff(): Promise<string> {
   const [i, nextFiles] = await load(filenames);
-
   const [j] = await load(nextFiles);
 
+  // always shrink the larger image rather than blow up the small one.
   const [small, big] = i.width < j.width ? [i, j] : [j, i];
 
   const c = createCanvas(small.width, small.height);
@@ -73,4 +73,43 @@ export async function makeHeathcliff(): Promise<string> {
     out.on("finish", () => res(filename));
     out.on("error", e => rej(e));
   });
+}
+
+function detectBottom(
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number
+): number {
+  // TODO: 20% instead of 10
+  const sliceHeight = Math.ceil(height * 0.15);
+
+  const imageData = ctx.getImageData(
+    0,
+    height - sliceHeight,
+    width,
+    sliceHeight
+  );
+
+  let darkestRow = 0;
+  let darkestValue = Number.POSITIVE_INFINITY;
+
+  for (let row = sliceHeight; row >= 0; row--) {
+    let rowSum = 0;
+
+    for (let col = 0; col < width * 4 - 4; col += 4) {
+      const offset = row * width * 4;
+      rowSum += imageData.data[offset + col + 0];
+      rowSum += imageData.data[offset + col + 1];
+      rowSum += imageData.data[offset + col + 2];
+    }
+
+    if (darkestValue > rowSum) {
+      darkestValue = rowSum;
+      darkestRow = row;
+    }
+  }
+
+  ctx.putImageData(imageData, 0, height - sliceHeight);
+
+  return height - sliceHeight + darkestRow;
 }
