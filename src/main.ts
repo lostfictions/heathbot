@@ -1,35 +1,23 @@
 require("source-map-support").install();
 
+import { createReadStream } from "fs";
+
+import { twoot } from "twoot";
+import Masto from "masto";
+
 import { makeHeathcliff } from "./heath";
-import { twoot, Configs as TwootConfigs } from "twoot";
 import { randomInArray } from "./util";
 
 import {
   MASTODON_SERVER,
   MASTODON_TOKEN,
   isValidMastodonConfiguration,
-  TWITTER_CONSUMER_KEY as consumerKey,
-  TWITTER_CONSUMER_SECRET as consumerSecret,
-  TWITTER_ACCESS_KEY as accessKey,
-  TWITTER_ACCESS_SECRET as accessSecret,
+  TWITTER_CONSUMER_KEY,
+  TWITTER_CONSUMER_SECRET,
+  TWITTER_ACCESS_KEY,
+  TWITTER_ACCESS_SECRET,
   isValidTwitterConfiguration
 } from "./env";
-
-const twootConfigs: TwootConfigs = [];
-if (isValidMastodonConfiguration) {
-  twootConfigs.push({
-    token: MASTODON_TOKEN,
-    server: MASTODON_SERVER
-  });
-}
-if (isValidTwitterConfiguration) {
-  twootConfigs.push({
-    consumerKey,
-    consumerSecret,
-    accessKey,
-    accessSecret
-  });
-}
 
 const messages = [
   `Today's Heathcliff:`,
@@ -48,12 +36,47 @@ async function makeTwoot(): Promise<{ filename: string; status: string }> {
 async function doTwoot(): Promise<void> {
   const { filename, status } = await makeTwoot();
   try {
-    const urls = await twoot(twootConfigs, status, [filename]);
-    for (const url of urls) {
-      console.log(`twooted at '${url}'!`);
+    if (isValidTwitterConfiguration) {
+      const url = await twoot(
+        [
+          {
+            consumerKey: TWITTER_CONSUMER_KEY,
+            consumerSecret: TWITTER_CONSUMER_SECRET,
+            accessKey: TWITTER_ACCESS_KEY,
+            accessSecret: TWITTER_ACCESS_SECRET
+          }
+        ],
+        status,
+        [filename]
+      );
+      console.log(`tweeted at '${url}'!`);
     }
   } catch (e) {
-    console.error("error while trying to twoot: ", e);
+    console.error("error while trying to tweet: ", e);
+  }
+
+  try {
+    if (isValidMastodonConfiguration) {
+      const masto = await Masto.login({
+        uri: MASTODON_SERVER,
+        accessToken: MASTODON_TOKEN
+      });
+
+      const { id } = await masto.uploadMediaAttachment({
+        file: createReadStream(filename),
+        focus: "0,-1.0"
+      });
+
+      const { uri } = await masto.createStatus({
+        status,
+        visibility: "public",
+        media_ids: [id]
+      });
+
+      console.log(`tooted at '${uri}'!`);
+    }
+  } catch (e) {
+    console.error("error while trying to toot: ", e);
   }
 }
 
