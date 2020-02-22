@@ -84,9 +84,17 @@ if (process.argv.slice(2).includes("local")) {
   const loop = () =>
     makeTwoot().then(({ filename, status }) => {
       console.log(`${status} file://${filename}`);
+      // eslint-disable-next-line @typescript-eslint/no-misused-promises
       setTimeout(loop, 1000);
     });
-  loop();
+
+  loop().catch(e => {
+    throw e;
+  });
 } else {
-  doTwoot().then(() => process.exit(0));
+  doTwoot()
+    .then(() => process.exit(0))
+    .catch(e => {
+      throw e;
+    });
 }
