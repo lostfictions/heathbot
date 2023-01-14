@@ -54,7 +54,9 @@ async function doTwoot(): Promise<void> {
       if (res.type === "error") {
         console.error(`error while twooting:\n${res.message}\n`);
       } else if (res.type === "twitter") {
-        console.log(`tweeted at '${res.status.user.url}/${res.status.id}'!`);
+        console.log(
+          `tweeted at 'https://twitter.com/${res.status.user.name}/${res.status.id}'!`
+        );
       } else {
         console.log(`tooted at '${res.status.url}'!`);
       }
