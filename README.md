@@ -3,6 +3,7 @@
 tweets and toots Extremely Official Heathcliff Comics™.
 
 https://twitter.com/its_heathcliff
+
 https://mastodon.social/@heathcliff
 
 ![a mixed-up heathcliff comic](https://i.imgur.com/Sm4PpX6.png)
