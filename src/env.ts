@@ -1,6 +1,8 @@
 import { existsSync } from "fs";
 import { parseEnv, z } from "znv";
 import { config } from "dotenv";
+import * as Sentry from "@sentry/node";
+import { CaptureConsole } from "@sentry/integrations";
 
 config();
 
@@ -55,10 +57,20 @@ export const {
   }
 );
 
-if (!SENTRY_DSN && NODE_ENV === "production") {
-  console.warn("SENTRY_DSN not provided! Sentry reporting will be disabled.");
-}
-
 if (!existsSync(DATA_DIR)) {
   throw new Error(`Data directory '${DATA_DIR}' doesn't exist!`);
+}
+
+if (!SENTRY_DSN && NODE_ENV === "production") {
+  console.warn(
+    `Sentry DSN is invalid! Error reporting to sentry will be disabled.`
+  );
+} else {
+  Sentry.init({
+    dsn: SENTRY_DSN,
+    environment: NODE_ENV,
+    integrations: [
+      new CaptureConsole({ levels: ["warn", "error", "debug", "assert"] }),
+    ],
+  });
 }
