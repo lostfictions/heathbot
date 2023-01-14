@@ -1,9 +1,4 @@
-require("source-map-support").install();
-
-import { createReadStream } from "fs";
-
 import { twoot } from "twoot";
-import Masto from "masto";
 
 import { makeHeathcliff } from "./heath";
 import { randomInArray } from "./util";
@@ -11,90 +6,78 @@ import { randomInArray } from "./util";
 import {
   MASTODON_SERVER,
   MASTODON_TOKEN,
-  isValidMastodonConfiguration,
-  TWITTER_CONSUMER_KEY,
-  TWITTER_CONSUMER_SECRET,
-  TWITTER_ACCESS_KEY,
+  TWITTER_API_KEY,
+  TWITTER_API_SECRET,
+  TWITTER_ACCESS_TOKEN,
   TWITTER_ACCESS_SECRET,
-  isValidTwitterConfiguration
 } from "./env";
 
 const messages = [
   `Today's Heathcliff:`,
   `Heathcliff comic for today:`,
   `It's Heathcliff!`,
-  `Here's Heathcliff!`
+  `Here's Heathcliff!`,
 ];
 
 async function makeTwoot(): Promise<{ filename: string; status: string }> {
   return {
     filename: await makeHeathcliff(),
-    status: randomInArray(messages)
+    status: randomInArray(messages),
   };
 }
 
 async function doTwoot(): Promise<void> {
-  const { filename, status } = await makeTwoot();
+  const { status, filename } = await makeTwoot();
   try {
-    if (isValidTwitterConfiguration) {
-      const url = await twoot(
-        [
-          {
-            consumerKey: TWITTER_CONSUMER_KEY,
-            consumerSecret: TWITTER_CONSUMER_SECRET,
-            accessKey: TWITTER_ACCESS_KEY,
-            accessSecret: TWITTER_ACCESS_SECRET
-          }
-        ],
+    const results = await twoot(
+      {
         status,
-        [filename]
-      );
-      console.log(`tweeted at '${url}'!`);
+        media: [{ path: filename, focus: "0,-1.0" }],
+      },
+      [
+        {
+          type: "twitter",
+          apiKey: TWITTER_API_KEY,
+          apiSecret: TWITTER_API_SECRET,
+          accessToken: TWITTER_ACCESS_TOKEN,
+          accessSecret: TWITTER_ACCESS_SECRET,
+        },
+        {
+          type: "mastodon",
+          server: MASTODON_SERVER,
+          token: MASTODON_TOKEN,
+        },
+      ]
+    );
+
+    for (const res of results) {
+      if (res.type === "error") {
+        console.error(`error while twooting:\n${res.message}\n`);
+      } else if (res.type === "twitter") {
+        console.log(`tweeted at '${res.status.user.url}/${res.status.id}'!`);
+      } else {
+        console.log(`tooted at '${res.status.url}'!`);
+      }
     }
   } catch (e) {
-    console.error("error while trying to tweet: ", e);
-  }
-
-  try {
-    if (isValidMastodonConfiguration) {
-      const masto = await Masto.login({
-        uri: MASTODON_SERVER,
-        accessToken: MASTODON_TOKEN
-      });
-
-      const { id } = await masto.uploadMediaAttachment({
-        file: createReadStream(filename),
-        focus: "0,-1.0"
-      });
-
-      const { uri } = await masto.createStatus({
-        status,
-        visibility: "public",
-        media_ids: [id]
-      });
-
-      console.log(`tooted at '${uri}'!`);
-    }
-  } catch (e) {
-    console.error("error while trying to toot: ", e);
+    console.error("error while trying to twoot: ", e);
   }
 }
 
 if (process.argv.slice(2).includes("local")) {
-  const loop = () =>
-    makeTwoot().then(({ filename, status }) => {
-      console.log(`${status} file://${filename}`);
-      // eslint-disable-next-line @typescript-eslint/no-misused-promises
-      setTimeout(loop, 1000);
-    });
+  const loop = async () => {
+    const { filename, status } = await makeTwoot();
+    console.log(`${status} file://${filename}`);
+    setTimeout(() => {
+      void loop();
+    }, 1000);
+  };
 
-  loop().catch(e => {
-    throw e;
-  });
+  void loop();
 } else {
   doTwoot()
     .then(() => process.exit(0))
-    .catch(e => {
+    .catch((e) => {
       throw e;
     });
 }

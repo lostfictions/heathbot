@@ -1,63 +1,64 @@
-import * as fs from "fs";
-import * as envalid from "envalid";
+import { existsSync } from "fs";
+import { parseEnv, z } from "znv";
+import { config } from "dotenv";
 
-const env = envalid.cleanEnv(
-  process.env,
-  {
-    DATA_DIR: envalid.str({ default: "persist" }),
-    MASTODON_SERVER: envalid.url({ default: "https://mastodon.social" }),
-    MASTODON_TOKEN: envalid.str({ default: "" }),
-    TWITTER_CONSUMER_KEY: envalid.str({ default: "" }),
-    TWITTER_CONSUMER_SECRET: envalid.str({ default: "" }),
-    TWITTER_ACCESS_KEY: envalid.str({ default: "" }),
-    TWITTER_ACCESS_SECRET: envalid.str({ default: "" }),
-    CRON_RULE: envalid.str({ default: "0 2,6,10,14,18,22 * * *" })
-  },
-  { strict: true }
-);
+config();
 
 export const {
+  NODE_ENV,
   DATA_DIR,
   MASTODON_SERVER,
   MASTODON_TOKEN,
-  TWITTER_CONSUMER_KEY,
-  TWITTER_CONSUMER_SECRET,
-  TWITTER_ACCESS_KEY,
+  TWITTER_API_KEY,
+  TWITTER_API_SECRET,
+  TWITTER_ACCESS_TOKEN,
   TWITTER_ACCESS_SECRET,
-  CRON_RULE,
-  isDev
-} = env;
+  SENTRY_DSN,
+} = parseEnv(
+  // eslint-disable-next-line node/no-process-env
+  process.env,
+  {
+    NODE_ENV: {
+      schema: z.string().optional(),
+    },
+    DATA_DIR: {
+      schema: z.string().min(1),
+      defaults: { _: "persist" },
+    },
+    MASTODON_SERVER: {
+      schema: z.string().url(),
+      defaults: { _: "https://mastodon.social" },
+    },
+    MASTODON_TOKEN: {
+      schema: z.string().min(1),
+      defaults: { production: undefined, _: "unused" },
+    },
+    TWITTER_API_KEY: {
+      schema: z.string().min(1),
+      defaults: { production: undefined, _: "unused" },
+    },
+    TWITTER_API_SECRET: {
+      schema: z.string().min(1),
+      defaults: { production: undefined, _: "unused" },
+    },
+    TWITTER_ACCESS_TOKEN: {
+      schema: z.string().min(1),
+      defaults: { production: undefined, _: "unused" },
+    },
+    TWITTER_ACCESS_SECRET: {
+      schema: z.string().min(1),
+      defaults: { production: undefined, _: "unused" },
+    },
+    SENTRY_DSN: {
+      schema: z.string().min(1).optional(),
+    },
+  }
+);
 
-if (!fs.existsSync(DATA_DIR)) {
-  throw new Error(`Data directory '${DATA_DIR}' doesn't exist!`);
+if (!SENTRY_DSN && NODE_ENV === "production") {
+  console.warn("SENTRY_DSN not provided! Sentry reporting will be disabled.");
 }
 
-export const isValidMastodonConfiguration = MASTODON_TOKEN.length > 0;
-export const isValidTwitterConfiguration =
-  TWITTER_CONSUMER_KEY &&
-  TWITTER_CONSUMER_SECRET &&
-  TWITTER_ACCESS_KEY &&
-  TWITTER_ACCESS_SECRET;
-
-if (!isDev && !isValidMastodonConfiguration && !isValidTwitterConfiguration) {
-  console.error(`Invalid environment config!`);
-  console.error(
-    `Bot will do nothing if no Mastodon API token (or Twitter API token set) is present.`
-  );
-  console.error(
-    `Note that all four Twitter token types must be present for Twitter to work.`
-  );
-
-  const varsToCheck: (keyof typeof env)[] = [
-    "MASTODON_TOKEN",
-    "TWITTER_CONSUMER_KEY",
-    "TWITTER_CONSUMER_SECRET",
-    "TWITTER_ACCESS_KEY",
-    "TWITTER_ACCESS_SECRET"
-  ];
-  const configInfo = varsToCheck
-    .map(key => `${key}: ${env[key] ? "OK" : "NONE"}`)
-    .join("\n");
-
-  throw new Error(configInfo);
+if (!existsSync(DATA_DIR)) {
+  throw new Error(`Data directory '${DATA_DIR}' doesn't exist!`);
 }

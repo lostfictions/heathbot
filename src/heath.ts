@@ -2,7 +2,12 @@ import fs from "fs";
 import path from "path";
 import { tmpdir } from "os";
 
-import { createCanvas, loadImage, Image } from "canvas";
+import {
+  createCanvas,
+  loadImage,
+  Image,
+  type CanvasRenderingContext2D,
+} from "canvas";
 
 import { randomInArray } from "./util";
 import { DATA_DIR } from "./env";
@@ -85,7 +90,7 @@ export async function makeHeathcliff(): Promise<string> {
 
   return new Promise<string>((res, rej) => {
     out.on("finish", () => res(filename));
-    out.on("error", e => rej(e));
+    out.on("error", (e) => rej(e));
   });
 }
 
