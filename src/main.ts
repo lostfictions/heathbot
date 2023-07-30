@@ -3,14 +3,7 @@ import { twoot } from "twoot";
 import { makeHeathcliff } from "./heath";
 import { randomInArray } from "./util";
 
-import {
-  MASTODON_SERVER,
-  MASTODON_TOKEN,
-  TWITTER_API_KEY,
-  TWITTER_API_SECRET,
-  TWITTER_ACCESS_TOKEN,
-  TWITTER_ACCESS_SECRET,
-} from "./env";
+import { MASTODON_SERVER, MASTODON_TOKEN } from "./env";
 
 const messages = [
   `Today's Heathcliff:`,
@@ -36,18 +29,11 @@ async function doTwoot(): Promise<void> {
       },
       [
         {
-          type: "twitter",
-          apiKey: TWITTER_API_KEY,
-          apiSecret: TWITTER_API_SECRET,
-          accessToken: TWITTER_ACCESS_TOKEN,
-          accessSecret: TWITTER_ACCESS_SECRET,
-        },
-        {
           type: "mastodon",
           server: MASTODON_SERVER,
           token: MASTODON_TOKEN,
         },
-      ]
+      ],
     );
 
     for (const res of results) {
@@ -55,7 +41,7 @@ async function doTwoot(): Promise<void> {
         console.error(`error while twooting:\n${res.message}\n`);
       } else if (res.type === "twitter") {
         console.log(
-          `tweeted at 'https://twitter.com/${res.status.user.name}/${res.status.id}'!`
+          `tweeted at 'https://twitter.com/${res.status.user.name}/${res.status.id}'!`,
         );
       } else {
         console.log(`tooted at '${res.status.url}'!`);

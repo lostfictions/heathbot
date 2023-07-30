@@ -11,10 +11,6 @@ export const {
   DATA_DIR,
   MASTODON_SERVER,
   MASTODON_TOKEN,
-  TWITTER_API_KEY,
-  TWITTER_API_SECRET,
-  TWITTER_ACCESS_TOKEN,
-  TWITTER_ACCESS_SECRET,
   SENTRY_DSN,
 } = parseEnv(
   // eslint-disable-next-line node/no-process-env
@@ -35,37 +31,18 @@ export const {
       schema: z.string().min(1),
       defaults: { production: undefined, _: "unused" },
     },
-    TWITTER_API_KEY: {
-      schema: z.string().min(1),
-      defaults: { production: undefined, _: "unused" },
-    },
-    TWITTER_API_SECRET: {
-      schema: z.string().min(1),
-      defaults: { production: undefined, _: "unused" },
-    },
-    TWITTER_ACCESS_TOKEN: {
-      schema: z.string().min(1),
-      defaults: { production: undefined, _: "unused" },
-    },
-    TWITTER_ACCESS_SECRET: {
-      schema: z.string().min(1),
-      defaults: { production: undefined, _: "unused" },
-    },
     SENTRY_DSN: {
-      schema: z.string().min(1).optional(),
+      schema: z.string().min(1),
+      defaults: { production: undefined, _: "unused" },
     },
-  }
+  },
 );
 
 if (!existsSync(DATA_DIR)) {
   throw new Error(`Data directory '${DATA_DIR}' doesn't exist!`);
 }
 
-if (!SENTRY_DSN && NODE_ENV === "production") {
-  console.warn(
-    `Sentry DSN is invalid! Error reporting to sentry will be disabled.`
-  );
-} else {
+if (NODE_ENV === "production") {
   Sentry.init({
     dsn: SENTRY_DSN,
     environment: NODE_ENV,
