@@ -62,7 +62,7 @@ export async function makeHeathcliff(): Promise<string> {
 
   const shrinkAmount = small.width / big.width;
   const captionHeight = Math.floor(
-    (bigCanvas.height - bigBottom) * shrinkAmount
+    (bigCanvas.height - bigBottom) * shrinkAmount,
   );
 
   const destCanvas = createCanvas(small.width, smallBottom + captionHeight);
@@ -78,7 +78,7 @@ export async function makeHeathcliff(): Promise<string> {
     0,
     smallBottom,
     small.width,
-    captionHeight
+    captionHeight,
   );
 
   filenameIndex += 1;
@@ -97,7 +97,7 @@ export async function makeHeathcliff(): Promise<string> {
 function detectBottom(
   ctx: CanvasRenderingContext2D,
   width: number,
-  height: number
+  height: number,
 ): number {
   const sliceHeight = Math.ceil(height * 0.15);
 
@@ -105,7 +105,7 @@ function detectBottom(
     0,
     height - sliceHeight,
     width,
-    sliceHeight
+    sliceHeight,
   );
 
   let darkestRow = 0;

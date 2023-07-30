@@ -32,7 +32,7 @@ export interface WeightedValues {
   [value: string]: number;
 }
 export function randomByWeight<T extends WeightedValues, K extends keyof T>(
-  weights: T
+  weights: T,
 ): K {
   const keys = Object.keys(weights) as K[];
   const sum = Object.values(weights).reduce((p, c) => {
