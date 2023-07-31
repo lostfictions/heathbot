@@ -2,9 +2,9 @@
 
 tweets and toots Extremely Official Heathcliff Comics™.
 
-https://twitter.com/its_heathcliff
-
 https://mastodon.social/@heathcliff
+
+~~https://twitter.com/its_heathcliff~~ no longer functional on twitter as of may 2023
 
 ![a mixed-up heathcliff comic](https://i.imgur.com/Sm4PpX6.png)
 
@@ -49,10 +49,14 @@ develop and host bots on your own server.)
 the bot needs environment variables if you want it to do stuff:
 
 - `MASTODON_TOKEN`: a Mastodon user API token
+
 - `MASTODON_SERVER`: the instance to which API calls should be made (usually
   where the bot user lives.) (default: https://mastodon.social)
-- `TWITTER_API_KEY`, `TWITTER_API_SECRET`, `TWITTER_ACCESS_TOKEN`, and
-  `TWITTER_ACCESS_SECRET`: you need all of these guys to make a tweet.
+
+- ~~`TWITTER_API_KEY`, `TWITTER_API_SECRET`, `TWITTER_ACCESS_TOKEN`, and
+  `TWITTER_ACCESS_SECRET`: you need all of these guys to make a tweet.~~ twitter
+  broke api usage in may 2023 and this code has been removed.
+
 - `DATA_DIR`: the directory to search for heathcliff comics. (default:
   'persist')
 
