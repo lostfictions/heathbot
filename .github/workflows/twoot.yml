@@ -27,3 +27,5 @@ jobs:
           DATA_DIR: "persist"
           MASTODON_TOKEN: ${{ secrets.MASTODON_TOKEN }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          BSKY_USERNAME: ${{ secrets.BSKY_USERNAME }}
+          BSKY_PASSWORD: ${{ secrets.BSKY_PASSWORD }}
