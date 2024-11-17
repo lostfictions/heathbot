@@ -50,7 +50,7 @@ async function doTwoot(): Promise<void> {
       if (res.type === "error") {
         console.error(`error while twooting:\n${res.message}\n`);
       } else if (res.type === "bsky") {
-        console.log(`skeeted at ${res.status.uri}!`);
+        console.log(`skeeted at '${res.status.uri}'!`);
       } else {
         console.log(`tooted at '${res.status.url}'!`);
       }
