@@ -26,37 +26,23 @@ async function makeTwoot(): Promise<{ filename: string; status: string }> {
 
 async function doTwoot(): Promise<void> {
   const { status, filename } = await makeTwoot();
-  try {
-    const results = await twoot(
-      {
-        status,
-        media: [{ path: filename, focus: "0,-1.0" }],
-      },
-      [
-        {
-          type: "mastodon",
-          server: MASTODON_SERVER,
-          token: MASTODON_TOKEN,
-        },
-        {
-          type: "bsky",
-          username: BSKY_USERNAME,
-          password: BSKY_PASSWORD,
-        },
-      ],
-    );
 
-    for (const res of results) {
-      if (res.type === "error") {
-        console.error(`error while twooting:\n${res.message}\n`);
-      } else if (res.type === "bsky") {
-        console.log(`skeeted at '${res.status.uri}'!`);
-      } else {
-        console.log(`tooted at '${res.status.url}'!`);
-      }
+  const results = await twoot(
+    { status, media: [{ path: filename, focus: "0,-1.0" }] },
+    [
+      { type: "mastodon", server: MASTODON_SERVER, token: MASTODON_TOKEN },
+      { type: "bsky", username: BSKY_USERNAME, password: BSKY_PASSWORD },
+    ],
+  );
+
+  for (const res of results) {
+    if (res.type === "error") {
+      console.error(`error while twooting:\n${res.message}\n`);
+    } else if (res.type === "bsky") {
+      console.log(`skeeted at '${res.status.uri}'!`);
+    } else {
+      console.log(`tooted at '${res.status.url}'!`);
     }
-  } catch (e) {
-    console.error("error while trying to twoot: ", e);
   }
 }
 
